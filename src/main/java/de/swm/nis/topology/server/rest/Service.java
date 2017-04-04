@@ -4,7 +4,7 @@ import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.domain.RWO;
 import de.swm.nis.topology.server.service.BlockedPath;
 import de.swm.nis.topology.server.service.BlockingService;
-import de.swm.nis.topology.server.service.NodeService;
+import de.swm.nis.topology.server.database.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,8 +1,8 @@
 package de.swm.nis.topology.server.service;
 
+import de.swm.nis.topology.server.database.NodeService;
 import de.swm.nis.topology.server.domain.Node;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Block;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 

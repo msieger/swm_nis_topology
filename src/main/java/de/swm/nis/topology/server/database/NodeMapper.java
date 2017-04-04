@@ -1,4 +1,4 @@
-package de.swm.nis.topology.server.service;
+package de.swm.nis.topology.server.database;
 
 import de.swm.nis.topology.server.domain.Node;
 import org.springframework.jdbc.core.RowMapper;

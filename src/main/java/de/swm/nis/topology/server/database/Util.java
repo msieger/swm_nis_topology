@@ -1,4 +1,4 @@
-package de.swm.nis.topology.server.service;
+package de.swm.nis.topology.server.database;
 
 import java.util.List;
 
