@@ -18,13 +18,13 @@ public class PgRoutingService implements RoutingService{
     private PgRoutingResultMapper resultMapper;
 
     @Override
-    public RoutingResult route(Node from, Node to) {
+    public RoutingResult route(String network, Node from, Node to) {
         String edgeSql = "select *, 1 cost, 1 reverse_cost from pgr_edges";
         List<PgRoutingResult> results = templ.query(
                 String.format("select * from pgr_astar('%s', ?, ?, false)", edgeSql),
                 new Object[] { from.getId(), to.getId() }, resultMapper);
-        RoutingResult result = new RoutingResult();
-        result.setNodes(results.stream().map(r -> r.getNode()).collect(Collectors.toList()));
+        RoutingResult result = new RoutingResult(null);
+        //result.setNodes(results.stream().map(r -> r.getNode()).collect(Collectors.toList()));
         return result;
     }
 }

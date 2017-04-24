@@ -16,7 +16,6 @@ public class EdgeMapper implements RowMapper<Edge> {
         result.setSource(new Node(rs.getLong("source")));
         result.setTarget(new Node(rs.getLong("target")));
         result.setGeom(rs.getString("geom"));
-        result.setLength(rs.getDouble("length"));
         return result;
     }
 }

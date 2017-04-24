@@ -5,6 +5,6 @@ import de.swm.nis.topology.server.domain.Node;
 
 public interface RoutingService {
 
-    RoutingResult route(Node from, Node to);
+    RoutingResult route(String network, Node from, Node to);
 
 }

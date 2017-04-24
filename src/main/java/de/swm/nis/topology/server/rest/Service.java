@@ -2,9 +2,13 @@ package de.swm.nis.topology.server.rest;
 
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.domain.RWO;
+import de.swm.nis.topology.server.routing.RoutingResult;
+import de.swm.nis.topology.server.routing.RoutingService;
 import de.swm.nis.topology.server.service.BlockedPath;
 import de.swm.nis.topology.server.service.BlockingService;
 import de.swm.nis.topology.server.database.NodeService;
+import de.swm.nis.topology.server.service.Path;
+import de.swm.nis.topology.server.service.ShortestPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +26,18 @@ public class Service {
 
     @Autowired
     private BlockingService blockingService;
+
+    @Autowired
+    private ShortestPath routingService;
+
+    @RequestMapping("/route")
+    public Path getRoute(
+             @PathVariable String network,
+             @RequestParam("from") long from_id,
+             @RequestParam("to") long to_id
+    ) {
+        return routingService.find(network, new Node(from_id), new Node(to_id));
+    }
 
     @RequestMapping("/node")
     public Set<Node> getNodes(

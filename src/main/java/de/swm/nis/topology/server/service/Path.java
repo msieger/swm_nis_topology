@@ -6,23 +6,20 @@ import java.util.List;
 
 public class Path {
 
-    private List<Node> nodes;
+    private List<Long> nodes;
 
-    private String geometry;
+    private String geom;
 
-    public List<Node> getNodes() {
+    public Path(List<Long> nodes, String geom) {
+        this.nodes = nodes;
+        this.geom = geom;
+    }
+
+    public List<Long> getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<Node> nodes) {
-        this.nodes = nodes;
-    }
-
-    public String getGeometry() {
-        return geometry;
-    }
-
-    public void setGeometry(String geometry) {
-        this.geometry = geometry;
+    public String getGeom() {
+        return geom;
     }
 }

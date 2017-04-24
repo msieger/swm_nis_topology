@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,7 @@ public class NodeService {
         if(!behSql.isEmpty()) {
             behSql = " and not " + behSql + "(source)";
         }
-        String sql = "select source, target, ST_AsText(geom) geom, ST_Length(geom) length from neighbor where source = ?"
+        String sql = "select source, target, ST_AsText(geom) geom from neighbor where source = ?"
                 + behSql;
         return new HashSet<>(templ.query(sql, new Object[] { node.getId()}, edgeMapper));
     }
@@ -77,7 +78,7 @@ public class NodeService {
         return new HashSet<>(list);
     }
 
-    public String collect(Set<String> geometries) {
+    public String collect(Collection<String> geometries) {
         return String.format("GEOMETRYCOLLECTION(%s)", String.join(",", geometries));
     }
 }
