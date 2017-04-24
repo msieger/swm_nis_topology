@@ -24,6 +24,7 @@ public class BlockingService {
     public BlockedPath getBlockedPath(String network, Node startNode) {
         Set<Node> workingSet = new HashSet<>();
         Set<Node> expanded = new HashSet<>();
+        Set<String> geoms = new HashSet<>();
         workingSet.add(startNode);
         while(!workingSet.isEmpty()) {
             Iterator<Node> it = workingSet.iterator();
@@ -32,12 +33,14 @@ public class BlockingService {
             expanded.add(toExpand);
             Set<Edge> edges = nodeService.getNeighbors(network, toExpand, NodeService.ExpandBehavior.NEVER);
             Set<Node> newNodes = edges.stream().map(x -> x.getTarget()).collect(Collectors.toSet());
+            geoms.addAll(edges.stream().map(x -> x.getGeom()).collect(Collectors.toList()));
             newNodes.removeAll(expanded);
             workingSet.addAll(newNodes);
         }
         BlockedPath block = new BlockedPath();
         block.setNodes(expanded);
         block.setBlockingNodes(nodeService.filter(network, expanded, NodeService.ExpandBehavior.NEVER));
+        block.setGeometry(nodeService.collect(geoms));
         return block;
     }
 
