@@ -20,6 +20,7 @@ public class Service {
     @Autowired
     private NodeService nodeService;
 
+    @Autowired
     private BlockingService blockingService;
 
     @RequestMapping("/node")
@@ -31,12 +32,12 @@ public class Service {
         return nodeService.getNodes(network, new RWO(rwoId, rwoCode, appCode));
     }
 
-    @RequestMapping("/")
+    @RequestMapping("/blocked_path")
     public BlockedPath getBlockedPath(
             @PathVariable String network,
             @RequestParam("node_id") long nodeId
     ) {
-        return blockingService.getBlockedPath(new Node(nodeId));
+        return blockingService.getBlockedPath(network, new Node(nodeId));
     }
 
 }

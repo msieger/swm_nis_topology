@@ -1,6 +1,7 @@
 package de.swm.nis.topology.server.service;
 
 import de.swm.nis.topology.server.database.NodeService;
+import de.swm.nis.topology.server.domain.Edge;
 import de.swm.nis.topology.server.domain.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class BlockingService {
@@ -19,7 +21,7 @@ public class BlockingService {
     @Autowired
     private NodeService nodeService;
 
-    public BlockedPath getBlockedPath(Node startNode) {
+    public BlockedPath getBlockedPath(String network, Node startNode) {
         Set<Node> workingSet = new HashSet<>();
         Set<Node> expanded = new HashSet<>();
         workingSet.add(startNode);
@@ -28,13 +30,14 @@ public class BlockingService {
             Node toExpand = it.next();
             it.remove();
             expanded.add(toExpand);
-            Set<Node> newNodes = nodeService.getNeighbors(toExpand, NodeService.ExpandBehavior.NEVER);
+            Set<Edge> edges = nodeService.getNeighbors(network, toExpand, NodeService.ExpandBehavior.NEVER);
+            Set<Node> newNodes = edges.stream().map(x -> x.getTarget()).collect(Collectors.toSet());
             newNodes.removeAll(expanded);
             workingSet.addAll(newNodes);
         }
         BlockedPath block = new BlockedPath();
         block.setNodes(expanded);
-        block.setBlockingNodes(nodeService.filter(expanded, NodeService.ExpandBehavior.NEVER));
+        block.setBlockingNodes(nodeService.filter(network, expanded, NodeService.ExpandBehavior.NEVER));
         return block;
     }
 

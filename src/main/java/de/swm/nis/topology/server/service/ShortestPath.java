@@ -22,7 +22,7 @@ public class ShortestPath {
         RoutingResult route = routingService.route(from, to);
         Path path = new Path();
         path.setNodes(route.getNodes());
-        path.setGeometry(nodeService.buildGeometry(path.getNodes()));
+        //path.setGeometry(nodeService.buildGeometry(path.getNodes()));
         return path;
     }
 

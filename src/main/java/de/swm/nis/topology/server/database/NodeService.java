@@ -16,7 +16,12 @@ import java.util.stream.Collectors;
 @Component
 public class NodeService {
 
+    private static final String PUBLIC = "public";
+
     public enum ExpandBehavior {ALWAYS, NEVER, IF_OPEN}
+
+    @Autowired
+    private EdgeMapper edgeMapper;
 
     @Autowired
     private NodeMapper nodeMapper;
@@ -47,56 +52,29 @@ public class NodeService {
         }
     }
 
-    public Set<Node> getNeighbors(Node node, ExpandBehavior behavior) {
+    @Transactional
+    public Set<Edge> getNeighbors(String network, Node node, ExpandBehavior behavior) {
+        Schema.set(templ, network, PUBLIC);
         String behSql = behaviorFunction(behavior);
         if(!behSql.isEmpty()) {
-            behSql = " and " + behSql;
+            behSql = " and not " + behSql + "(source)";
         }
-        behSql = behSql + "(c1.node_id)";
-        String sql =
-                "select c1.rwo_id, c1.rwo_code, c1.app_code, max(c2.point_idx)" +
-                        "from connection c1" +
-                        "join connection c2 on c1.rwo_id = c2.rwo_id and c1.rwo_code = c2.rwo_code and c1.app_code = c2.app_code" +
-                        "where c1.node_id = ? and c2.point_idx < c1.point_idx" +
-                        behSql +
-                        "group by c1.rwo_id, c1.rwo_code, c1.app_code" +
-                        "union" +
-                        "select c1.rwo_id, c1.rwo_code, c1.app_code, min(c2.point_idx)" +
-                        "from connection c1" +
-                        "join connection c2 on c1.rwo_id = c2.rwo_id and c1.rwo_code = c2.rwo_code and c1.app_code = c2.app_code" +
-                        "where c1.node_id = ? and c2.point_idx > c1.point_idx" +
-                        behSql +
-                        "group by c1.rwo_id, c1.rwo_code, c1.app_code";
-        return new HashSet<>(templ.query(sql, new Object[] { node.getId(), node.getId() }, nodeMapper));
+        String sql = "select source, target, geom, ST_Length(geom) length from neighbor where source = ?"
+                + behSql;
+        return new HashSet<>(templ.query(sql, new Object[] { node.getId()}, edgeMapper));
     }
 
-    public Set<Node> filter(Set<Node> nodes, ExpandBehavior behavior) {
+    @Transactional
+    public Set<Node> filter(String network, Set<Node> nodes, ExpandBehavior behavior) {
+        Schema.set(templ, network);
         if(behavior == ExpandBehavior.ALWAYS) {
             return new HashSet<>(nodes);
         }
         String behSql = behaviorFunction(behavior);
         behSql = behSql + "(node_id)";
         String array = Util.pgArray(nodes.stream().map( n -> Long.toString(n.getId())).collect(Collectors.toList()));
-        List<Node> list = templ.query("select node_id from (select unnest(?) node_id) where " + behSql, new Object[]{array}, nodeMapper);
+        List<Node> list = templ.query("select node_id from (select unnest(?::int8[]) node_id) s where " + behSql, new Object[]{array}, nodeMapper);
         return new HashSet<>(list);
-    }
-
-    public String buildGeometry(Set<Edge> nodes) {
-        String sql = "select public.ST_AsText(public.ST_Union(array(" +
-                "select geom" +
-                "from (" +
-                        "select public.ST_LineSubstring(geom, left_idx::float / public.ST_NPoints(geom), right_idx::float / public.ST_NPoints(geom)) geom" +
-        "from (" +
-                "select get_geom(c1.rwo_id, c1.rwo_code, c1.app_code) geom, c1.point_idx left_idx, c2.point_idx right_idx" +
-                "from connection c1" +
-                "join connection c2 on c1.rwo_id = c2.rwo_id and c1.rwo_code = c2.rwo_code and c1.app_code = c2.app_code" +
-                "where c1.node_id = any(?) and c1.point_idx < c2.point_idx" +
-        ") s" +
-        ") s" +
-        "where geom is not null" +
-        ")))";
-        String nodeArray = Util.pgArray(nodes.stream().map(n -> Long.toString(n.getId())).collect(Collectors.toList()));
-        return templ.query(sql, new Object[] {nodeArray}, stringMapper).get(0);
     }
 
 }

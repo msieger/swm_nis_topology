@@ -5,7 +5,7 @@ import java.util.List;
 public class Util {
 
     public static String pgArray(Iterable<String> elements) {
-        return "array[" + String.join(",", elements) + "]";
+        return "{" + String.join(",", elements) + "}";
     }
 
 }
