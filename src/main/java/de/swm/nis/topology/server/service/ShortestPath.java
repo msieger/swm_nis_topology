@@ -26,6 +26,9 @@ public class ShortestPath {
     @Transactional
     public Path find(String network, Node from, Node to) {
         RoutingResult routing = routingService.route(network, from, to);
+        if(routing == null) {
+            return null;
+        }
         List<String> geoms = routing.getEdges().stream().map(Edge::getGeom).collect(Collectors.toList());
         String geom = nodeService.collect(geoms);
         List<Long> nodes = new ArrayList<>();
