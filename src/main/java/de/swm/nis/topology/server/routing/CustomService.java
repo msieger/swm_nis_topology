@@ -52,19 +52,16 @@ public class CustomService implements RoutingService{
         Map<Node, Point> locations = new HashMap<>();
         locations.put(to, toLocation);
         Comparator<CustomNode> comp = (o1, o2) -> {
-            double d1 = locations.get(o1.getShortest().getTarget()).distance(toLocation);
-            double d2 = locations.get(o2.getShortest().getTarget()).distance(toLocation);
+            double d1 = o1.getTotal() + locations.get(o1.getNode()).distance(toLocation);
+            double d2 = o2.getTotal() + locations.get(o2.getNode()).distance(toLocation);
             if(d1 < d2) {
                 return -1;
-            }
-            if(d1 == d2) {
-                return 0;
             }
             return 1;
         };
         PriorityQueue<CustomNode> working = new PriorityQueue<>(INITIAL_CAPACITY, comp);
         Map<Node, CustomNode> expanded = new HashMap<>();
-        working.add(new CustomNode(from, null, null));
+        working.add(new CustomNode(from, null, 0, null));
         while(!working.isEmpty()) {
             Iterator<CustomNode> it = working.iterator();
             CustomNode toExpand = it.next();
@@ -92,7 +89,12 @@ public class CustomService implements RoutingService{
             });
             edges = edges.stream().filter(x -> !expanded.containsKey(x.getTarget())).collect(Collectors.toSet());
             Set<CustomNode> newNodes = edges.stream().map(edge -> {
-                return new CustomNode(edge.getTarget(), edge, toExpand);
+                try {
+                    return new CustomNode(edge.getTarget(), edge, toExpand.getTotal() + parser.parse(edge.getGeom()).getLength(), toExpand);
+                } catch (NotLineStringException | com.vividsolutions.jts.io.ParseException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }).collect(Collectors.toSet());
             working.addAll(newNodes);
         }
