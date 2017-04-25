@@ -1,25 +1,23 @@
 package de.swm.nis.topology.server.service;
 
-import de.swm.nis.topology.server.domain.Node;
-
 import java.util.List;
 
 public class Path {
 
     private List<Long> nodes;
 
-    private String geom;
+    private String geometry;
 
     public Path(List<Long> nodes, String geom) {
         this.nodes = nodes;
-        this.geom = geom;
+        this.geometry = geom;
     }
 
     public List<Long> getNodes() {
         return nodes;
     }
 
-    public String getGeom() {
-        return geom;
+    public String getGeometry() {
+        return geometry;
     }
 }
