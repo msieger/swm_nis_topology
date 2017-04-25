@@ -140,6 +140,6 @@ public class NodeService {
     }
 
     public String collect(Collection<String> geometries) {
-        return String.format("GEOMETRYCOLLECTION(%s)", String.join(",", geometries));
+        return String.format("MULTILINESTRING(%s)", String.join(",", geometries));
     }
 }
