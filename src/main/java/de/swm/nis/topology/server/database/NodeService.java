@@ -1,5 +1,6 @@
 package de.swm.nis.topology.server.database;
 
+import de.swm.nis.topology.server.domain.Connection;
 import de.swm.nis.topology.server.domain.Edge;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.domain.RWO;
@@ -8,10 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,6 +29,12 @@ public class NodeService {
     private StringMapper stringMapper;
 
     @Autowired
+    private ConnectionMapper connectionMapper;
+
+    @Autowired
+    private IntMapper intMapper;
+
+    @Autowired
     private JdbcTemplate templ;
 
     @Transactional
@@ -38,6 +42,63 @@ public class NodeService {
         Schema.set(templ, network);
         return new HashSet<>(templ.query("select node_id from connection where rwo_id = ? and rwo_code = ? and app_code = ?",
                 new Object[]{rwo.getId(), rwo.getCode(), rwo.getApp()}, nodeMapper));
+    }
+
+    private boolean tableExists(String schema, String table) {
+        return templ.query("select 1 from information_schema.tables where table_schema = ? and table_name = ?",
+                new Object[] {schema, table}, intMapper).size() == 1;
+    }
+
+    private boolean columnExists(String schema, String table, String column) {
+        return templ.query("select 1 from information_schema.columns " +
+                "where table_schema = ? and table_name = ? and column_name = ?",
+                new Object[] {schema, table, column}, intMapper).size() == 1;
+    }
+
+    @Transactional
+    public Node findNode(String network, String rwoName, String geomName, double x, double y, int srid) {
+        if(!tableExists(network, rwoName)) {
+            throw new RuntimeException("Table " + network + "." + geomName + " does not exist");
+        }
+        if(!columnExists(network, rwoName, geomName)) {
+            throw new RuntimeException("Column " + network + "." + rwoName + "." + geomName + " does not exist");
+        }
+        Schema.set(templ, network, PUBLIC);
+        String closestPointSql = String.format(
+                " select path[1]" +
+                " from ST_DumpPoints(%s.%s) " +
+                " order by ST_Distance(ST_DumpPoints.geom, (select * from point)) limit 1", rwoName, geomName, rwoName);
+        String sql = String.format(
+                " with point as (select ST_SetSRID(ST_MakePoint(?,?),?))" +
+                " select rwo_id[3], (%s)" +
+                " from %s" +
+                " where ST_DWithin(%s, (select * from point), 100)" +
+                " order by ST_Distance(%s, (select * from point))" +
+                " limit 1",
+                closestPointSql, rwoName, geomName, geomName);
+        AbstractMap.SimpleEntry<Long, Integer> closestIndex = templ.queryForObject(
+                sql,
+                new Object[] {x, y, srid},
+                (rs, nowNum) -> new AbstractMap.SimpleEntry<Long, Integer>(rs.getLong(1), rs.getInt(2))
+                );
+        List<Connection> cons = templ.query(
+                " select *" +
+                " from connection con" +
+                " join definition def on con.rwo_code = def.rwo_code" +
+                " join geom_attribute attr on con.rwo_code = attr.rwo_code" +
+                " and con.app_code = attr.app_code" +
+                " where con.rwo_id = ?",
+                new Object[] {closestIndex.getKey()},
+                connectionMapper);
+        Optional<Connection> closestNode = cons.stream().min((l, r) -> {
+            int d1 = Math.abs(l.getPointIdx() - closestIndex.getValue());
+            int d2 = Math.abs(r.getPointIdx() - closestIndex.getValue());
+            return d1 - d2;
+        });
+        if(!closestNode.isPresent()) {
+            throw new RuntimeException("No node was found");
+        }
+        return new Node(closestNode.get().getNodeId());
     }
 
     private static String behaviorFunction(ExpandBehavior b) {

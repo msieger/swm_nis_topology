@@ -39,13 +39,24 @@ public class Service {
         return routingService.find(network, new Node(from_id), new Node(to_id));
     }
 
-    @RequestMapping("/node")
+    @RequestMapping(value="/node", params={"rwo_id", "rwo_code", "app_code"})
     public Set<Node> getNodes(
             @PathVariable String network,
             @RequestParam("rwo_id") long rwoId,
             @RequestParam("rwo_code") int rwoCode,
             @RequestParam("app_code") int appCode) {
         return nodeService.getNodes(network, new RWO(rwoId, rwoCode, appCode));
+    }
+
+    @RequestMapping(value="/node", params={"rwo_name", "geom_name", "x", "y"})
+    public Node findNode(
+            @PathVariable String network,
+            @RequestParam("rwo_name") String rwoName,
+            @RequestParam("geom_name") String geomName,
+            @RequestParam("x") double x,
+            @RequestParam("y") double y
+    ) {
+        return nodeService.findNode(network, rwoName, geomName, x, y, 31468);
     }
 
     @RequestMapping("/blocked_path")
