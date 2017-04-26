@@ -1,5 +1,6 @@
 package de.swm.nis.topology.server.routing;
 
+import de.swm.nis.topology.server.database.Schema;
 import de.swm.nis.topology.server.domain.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,9 +20,9 @@ public class PgRoutingService implements RoutingService{
 
     @Override
     public RoutingResult route(String network, Node from, Node to) {
-        String edgeSql = "select *, 1 cost, 1 reverse_cost from pgr_edges";
+        Schema.set(templ, network, Schema.PUBLIC);
         List<PgRoutingResult> results = templ.query(
-                String.format("select * from pgr_astar('%s', ?, ?, false)", edgeSql),
+                "select * from pgr_astar('select * from pgr_edge', ?::int4, ?::int4, false, false)",
                 new Object[] { from.getId(), to.getId() }, resultMapper);
         RoutingResult result = new RoutingResult(null);
         //result.setNodes(results.stream().map(r -> r.getNode()).collect(Collectors.toList()));

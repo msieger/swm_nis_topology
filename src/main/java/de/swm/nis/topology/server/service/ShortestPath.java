@@ -4,6 +4,7 @@ import de.swm.nis.topology.server.database.NodeService;
 import de.swm.nis.topology.server.domain.Edge;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.routing.CustomService;
+import de.swm.nis.topology.server.routing.PgRoutingService;
 import de.swm.nis.topology.server.routing.RoutingResult;
 import de.swm.nis.topology.server.routing.RoutingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class ShortestPath {
 
     @Autowired
-    private CustomService routingService;
+    private PgRoutingService routingService;
 
     @Autowired
     private NodeService nodeService;
