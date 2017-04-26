@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ShortestPath {
 
     @Autowired
-    private PgRoutingService routingService;
+    private CustomService routingService;
 
     @Autowired
     private NodeService nodeService;
