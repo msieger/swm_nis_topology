@@ -106,7 +106,7 @@ public class NodeService {
             case ALWAYS:
                 return "";
             case NEVER:
-                return "is_closeable";
+                return "is_closable";
             case IF_OPEN:
                 return "is_closed";
             default:
