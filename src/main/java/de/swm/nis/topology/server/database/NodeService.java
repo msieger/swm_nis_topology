@@ -150,13 +150,26 @@ public class NodeService {
     }
 
     @Transactional
+    public Edge getShortestEdge(String network, Node from, Node to) throws NoEdgeException {
+        Schema.set(templ, network, Schema.PUBLIC);
+        List<Edge> edges = templ.query(
+                " select source, target, ST_AsBinary(geom) geom" +
+                " from neighbor" +
+                " where source=? and target=?" +
+                " order by ST_Length(geom)" +
+                " limit 1", new Object[]{from.getId(), to.getId()}, edgeMapper);
+        if(edges.size() == 1) {
+            return edges.get(0);
+        }
+        throw new NoEdgeException("Request for shortest edge between " + from + " and " + to + ", which does not exist");
+    }
+
+    @Transactional
     public void getAllSimpleEdges(String network, SimpleEdgeCallback cb) {
         Schema.set(templ, network, Schema.PUBLIC);
         templ.query(" select *" +
-                    " from (select con.node_id source, rwos.node_id target, ST_Length(geom) length " +
-                    " from connection con" +
-                    " join lookup_rwos() rwos on con.rwo_id = rwos.rwo_id and con.rwo_code = rwos.rwo_code and con.app_code = rwos.app_code" +
-                    " where con.node_id <> rwos.node_id" +
+                    " from (select source, target, ST_Length(geom) length " +
+                    " from neighbor" +
                     " ) s" +
                     " where length is not null",
                 new RowCallbackHandler() {

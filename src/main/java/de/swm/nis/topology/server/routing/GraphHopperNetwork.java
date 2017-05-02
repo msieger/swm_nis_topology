@@ -1,5 +1,6 @@
 package de.swm.nis.topology.server.routing;
 
+import com.google.common.collect.HashBiMap;
 import com.graphhopper.routing.Dijkstra;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
@@ -8,20 +9,25 @@ import com.graphhopper.routing.util.TraversalMode;
 import com.graphhopper.routing.weighting.ShortestWeighting;
 import com.graphhopper.storage.GraphBuilder;
 import com.graphhopper.storage.GraphHopperStorage;
+import de.swm.nis.topology.server.database.NoEdgeException;
 import de.swm.nis.topology.server.database.NodeService;
 import de.swm.nis.topology.server.domain.Edge;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.domain.SimpleEdge;
+import gnu.trove.procedure.TIntProcedure;
 import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GraphHopperNetwork {
+
+    private static final int NODE_MAP_INITIAL_SIZE = 100 * 1000;
 
     private final NodeService nodeService;
     private final String network;
@@ -30,7 +36,7 @@ public class GraphHopperNetwork {
 
     private final GraphHopperStorage graph;
     private final FlagEncoder encoder = new FootFlagEncoder();
-    private Map<Integer, Integer> nodeIds = new HashMap<>();
+    private HashBiMap<Integer, Integer> nodeIds = HashBiMap.create(NODE_MAP_INITIAL_SIZE);
 
     public GraphHopperNetwork(NodeService nodeService, String network, Logger log) {
         this.nodeService = nodeService;
@@ -46,7 +52,7 @@ public class GraphHopperNetwork {
             graph = gb.load();
             File nodeIdFile = nodeIdFile();
             try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(nodeIdFile))) {
-                nodeIds = (Map<Integer, Integer>) in.readObject();
+                nodeIds = (HashBiMap<Integer, Integer>) in.readObject();
             } catch (IOException e) {
                 throw new RuntimeException("Unable to load " + nodeIdFile, e);
             } catch (ClassNotFoundException e) {
@@ -116,12 +122,36 @@ public class GraphHopperNetwork {
         }
         com.graphhopper.routing.Path path = new Dijkstra(graph, new ShortestWeighting(encoder), TraversalMode.NODE_BASED)
                 .calcPath(nodeIds.get(from), nodeIds.get(to));
-        List<Edge> edges = path.calcEdges().stream().map(edge -> {
-            Edge res = new Edge();
-            res.setSource(new Node(nodeIds.get(from)));
-            res.setTarget(new Node(nodeIds.get(to)));
-            return res;
-        }).collect(Collectors.toList());
+        List<Edge> edges = new ArrayList<>();
+        path.calcNodes().forEach(new TIntProcedure() {
+
+            private int prev = -1;
+
+            @Override
+            public boolean execute(int node) {
+                if(prev != -1) {
+                    Node source = new Node(nodeIds.inverse().get(prev));
+                    Node target = new Node(nodeIds.inverse().get(node));
+                    try {
+                        edges.add(nodeService.getShortestEdge(network, source, target));
+                    } catch (NoEdgeException e) {
+                        log.warn("Edge between " + source + " and " + target + " was requested, but did not exist");
+                    }
+                }
+                prev = node;
+                return true;
+            }
+        });
+        /*List<Edge> edges = path.calcEdges().stream().map(edge -> {
+            Node source = new Node(nodeIds.inverse().get(edge.getBaseNode()));
+            Node target = new Node(nodeIds.inverse().get(edge.getAdjNode()));
+            try {
+                return nodeService.getShortestEdge(network, source, target);
+            } catch (NoEdgeException e) {
+                log.warn("Edge between " + source + " and " + target + " was requested, but did not exist");
+                return null;
+            }
+        }).filter(e -> e != null).collect(Collectors.toList());*/
         return new RoutingResult(edges);
     }
 }
