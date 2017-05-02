@@ -1,9 +1,7 @@
 package de.swm.nis.topology.server.database;
 
-import de.swm.nis.topology.server.domain.Connection;
-import de.swm.nis.topology.server.domain.Edge;
-import de.swm.nis.topology.server.domain.Node;
-import de.swm.nis.topology.server.domain.RWO;
+import de.swm.nis.topology.server.domain.*;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -15,12 +13,13 @@ import java.util.stream.Collectors;
 @Component
 public class NodeService {
 
-    private static final String PUBLIC = "public";
-
     public enum ExpandBehavior {ALWAYS, NEVER, IF_OPEN}
 
     @Autowired
     private EdgeMapper edgeMapper;
+
+    @Autowired
+    private SimpleEdgeMapper simpleEdgeMapper;
 
     @Autowired
     private NodeMapper nodeMapper;
@@ -36,6 +35,9 @@ public class NodeService {
 
     @Autowired
     private JdbcTemplate templ;
+
+    @Autowired
+    private Logger log;
 
     @Transactional
     public Set<Node> getNodes(String network, RWO rwo) {
@@ -63,7 +65,7 @@ public class NodeService {
         if(!columnExists(network, rwoName, geomName)) {
             throw new RuntimeException("Column " + network + "." + rwoName + "." + geomName + " does not exist");
         }
-        Schema.set(templ, network, PUBLIC);
+        Schema.set(templ, network, Schema.PUBLIC);
         String closestPointSql = String.format(
                 " select path[1]" +
                 " from ST_DumpPoints(%s.%s) " +
@@ -116,14 +118,34 @@ public class NodeService {
 
     @Transactional
     public Set<Edge> getNeighbors(String network, Node node, ExpandBehavior behavior) {
-        Schema.set(templ, network, PUBLIC);
+        Schema.set(templ, network, Schema.PUBLIC);
         String behSql = behaviorFunction(behavior);
         if(!behSql.isEmpty()) {
             behSql = " and not " + behSql + "(source)";
         }
-        String sql = "select source, target, ST_AsText(geom) geom from neighbor where source = ?"
+        String sql = "select source, target, ST_AsBinary(geom) geom from neighbor where source = ?"
                 + behSql;
-        return new HashSet<>(templ.query(sql, new Object[] { node.getId()}, edgeMapper));
+        return new HashSet<>(templ.query(sql, new Object[] { node.getId()}, edgeMapper))
+                .stream().filter(edge -> {
+                    if(edge.getGeom() == null) {
+                        log.warn(edge + " has null geometry and is ignored");
+                        return false;
+                    }
+                    return true;
+                }).collect(Collectors.toSet());
+    }
+
+    @Transactional
+    public Set<SimpleEdge> getAllSimpleEdges(String network) {
+        Schema.set(templ, network, Schema.PUBLIC);
+        return new HashSet<>(
+                templ.query(
+                        " select *" +
+                        " from (select source, target, ST_Length(geom) length " +
+                        " from neighbor" +
+                        " ) s" +
+                        " where length is not null",
+                new Object[]{}, simpleEdgeMapper));
     }
 
     @Transactional

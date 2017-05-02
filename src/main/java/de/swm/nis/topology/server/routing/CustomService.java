@@ -1,9 +1,9 @@
 package de.swm.nis.topology.server.routing;
 
 import com.vividsolutions.jts.geom.Point;
-import de.swm.nis.topology.server.database.LineStringParser;
 import de.swm.nis.topology.server.database.NodeService;
 import de.swm.nis.topology.server.domain.Edge;
+import de.swm.nis.topology.server.domain.InvalidGeomException;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.service.NotLineStringException;
 import org.apache.log4j.Logger;
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,9 +23,6 @@ public class CustomService implements RoutingService{
     private NodeService nodeService;
 
     @Autowired
-    private LineStringParser parser;
-
-    @Autowired
     private Logger logger;
 
     private Point getLocation(String network, Node node) {
@@ -35,11 +31,7 @@ public class CustomService implements RoutingService{
             return null;
         }
         Edge edge = edges.iterator().next();
-        try {
-            return parser.parse(edge.getGeom()).getStartPoint();
-        } catch (com.vividsolutions.jts.io.ParseException | NotLineStringException e) {
-            throw new RuntimeException("Can not determine location of node", e);
-        }
+        return edge.getGeom().getStartPoint();
     }
 
     @Transactional(readOnly = true)
@@ -79,22 +71,11 @@ public class CustomService implements RoutingService{
                 return true;
             }).collect(Collectors.toSet());
             edges.forEach(edge -> {
-                try {
-                    locations.put(edge.getTarget(), parser.parse(edge.getGeom()).getEndPoint());
-                } catch (NotLineStringException e) {
-                    e.printStackTrace();
-                } catch (com.vividsolutions.jts.io.ParseException e) {
-                    e.printStackTrace();
-                }
+                locations.put(edge.getTarget(), edge.getGeom().getEndPoint());
             });
             edges = edges.stream().filter(x -> !expanded.containsKey(x.getTarget())).collect(Collectors.toSet());
             Set<CustomNode> newNodes = edges.stream().map(edge -> {
-                try {
-                    return new CustomNode(edge.getTarget(), edge, toExpand.getTotal() + parser.parse(edge.getGeom()).getLength(), toExpand);
-                } catch (NotLineStringException | com.vividsolutions.jts.io.ParseException e) {
-                    e.printStackTrace();
-                    return null;
-                }
+                return new CustomNode(edge.getTarget(), edge, toExpand.getTotal() + edge.getGeom().getLength(), toExpand);
             }).collect(Collectors.toSet());
             working.addAll(newNodes);
         }

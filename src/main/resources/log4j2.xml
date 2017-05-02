@@ -9,9 +9,9 @@
         </File>
     </Appenders>
     <Loggers>
-        <Root level="info">
+        <topology_server level="info">
             <AppenderRef ref="Console" />
             <AppenderRef ref="MyFile"/>
-        </Root>
+        </topology_server>
     </Loggers>
 </Configuration>

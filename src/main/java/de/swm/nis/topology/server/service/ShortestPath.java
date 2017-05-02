@@ -4,9 +4,8 @@ import de.swm.nis.topology.server.database.NodeService;
 import de.swm.nis.topology.server.domain.Edge;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.routing.CustomService;
-import de.swm.nis.topology.server.routing.PgRoutingService;
+import de.swm.nis.topology.server.routing.GraphhopperService;
 import de.swm.nis.topology.server.routing.RoutingResult;
-import de.swm.nis.topology.server.routing.RoutingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,7 @@ public class ShortestPath {
         if(routing == null) {
             return null;
         }
-        List<String> geoms = routing.getEdges().stream().map(Edge::getGeom).collect(Collectors.toList());
+        List<String> geoms = routing.getEdges().stream().map(e -> e.getGeom().toText()).collect(Collectors.toList());
         String geom = nodeService.collect(geoms);
         List<Long> nodes = new ArrayList<>();
         if(routing.getEdges().size() > 0) {

@@ -33,7 +33,7 @@ public class BlockingService {
             expanded.add(toExpand);
             Set<Edge> edges = nodeService.getNeighbors(network, toExpand, NodeService.ExpandBehavior.NEVER);
             Set<Node> newNodes = edges.stream().map(x -> x.getTarget()).collect(Collectors.toSet());
-            geoms.addAll(edges.stream().map(x -> x.getGeom()).collect(Collectors.toList()));
+            geoms.addAll(edges.stream().map(x -> x.getGeom().toText()).collect(Collectors.toList()));
             newNodes.removeAll(expanded);
             workingSet.addAll(newNodes);
         }

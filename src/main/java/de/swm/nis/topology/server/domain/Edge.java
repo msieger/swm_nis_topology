@@ -1,11 +1,19 @@
 package de.swm.nis.topology.server.domain;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.ParseException;
+import de.swm.nis.topology.server.database.LineStringParser;
+import de.swm.nis.topology.server.service.NotLineStringException;
+
 public class Edge {
+
+    private static final LineStringParser parser = new LineStringParser();
 
     private RWO rwo;
     private Node source;
     private Node target;
-    private String geom;
+    private LineString geom;
 
     public RWO getRwo() {
         return rwo;
@@ -31,12 +39,24 @@ public class Edge {
         this.target = target;
     }
 
-    public String getGeom() {
+    public LineString getGeom() {
         return geom;
     }
 
-    public void setGeom(String geom) {
-        this.geom = geom;
+    public void setGeomWkt(String geomWkt) throws InvalidGeomException {
+        try {
+            geom = parser.parse(geomWkt);
+        } catch (NotLineStringException | ParseException e) {
+            throw new InvalidGeomException("The geometry '" + geomWkt + "' is invalid", e);
+        }
+    }
+
+    public void setGeomWkb(byte[] data) throws InvalidGeomException {
+        try {
+            geom = parser.parse(data);
+        } catch (NotLineStringException | ParseException e) {
+            throw new InvalidGeomException("The geometry is invalid", e);
+        }
     }
 
     @Override
@@ -68,7 +88,7 @@ public class Edge {
                 "rwo=" + rwo +
                 ", source=" + source +
                 ", target=" + target +
-                ", geom='" + geom + '\'' +
+                ", geom=" + geom +
                 '}';
     }
 }
