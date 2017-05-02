@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Component
 public class NodeService {
 
+    private static final int FETCH_SIZE = 10 * 1024;
+
     public enum ExpandBehavior {ALWAYS, NEVER, IF_OPEN}
 
     @Autowired
@@ -167,9 +169,10 @@ public class NodeService {
     @Transactional
     public void getAllSimpleEdges(String network, SimpleEdgeCallback cb) {
         Schema.set(templ, network, Schema.PUBLIC);
+        templ.setFetchSize(FETCH_SIZE);
         templ.query(" select *" +
                     " from (select source, target, ST_Length(geom) length " +
-                    " from neighbor" +
+                    " from all_neighbor" +
                     " ) s" +
                     " where length is not null",
                 new RowCallbackHandler() {
