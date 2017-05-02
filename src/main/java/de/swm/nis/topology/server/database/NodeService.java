@@ -3,10 +3,18 @@ package de.swm.nis.topology.server.database;
 import de.swm.nis.topology.server.domain.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import sun.java2d.pipe.SpanShapeRenderer;
+import sun.plugin.dom.exception.InvalidStateException;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -135,17 +143,36 @@ public class NodeService {
                 }).collect(Collectors.toSet());
     }
 
+    public interface SimpleEdgeCallback {
+
+        void accept(SimpleEdge edge);
+
+    }
+
     @Transactional
-    public Set<SimpleEdge> getAllSimpleEdges(String network) {
+    public void getAllSimpleEdges(String network, SimpleEdgeCallback cb) {
         Schema.set(templ, network, Schema.PUBLIC);
-        return new HashSet<>(
-                templ.query(
-                        " select *" +
-                        " from (select source, target, ST_Length(geom) length " +
-                        " from neighbor" +
-                        " ) s" +
-                        " where length is not null",
-                new Object[]{}, simpleEdgeMapper));
+        templ.query(" select *" +
+                    " from (select con.node_id source, rwos.node_id target, ST_Length(geom) length " +
+                    " from connection con" +
+                    " join lookup_rwos() rwos on con.rwo_id = rwos.rwo_id and con.rwo_code = rwos.rwo_code and con.app_code = rwos.app_code" +
+                    " where con.node_id <> rwos.node_id" +
+                    " ) s" +
+                    " where length is not null",
+                new RowCallbackHandler() {
+
+                    private SimpleEdge edge = new SimpleEdge();
+
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException, DataAccessException {
+                        while(rs.next()) {
+                            edge.setSource(new Node(rs.getLong("source")));
+                            edge.setTarget(new Node(rs.getLong("target")));
+                            edge.setDistance(rs.getDouble("length"));
+                            cb.accept(edge);
+                        }
+                    }
+                });
     }
 
     @Transactional

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class ShortestPath {
 
     @Autowired
-    private CustomService routingService;
+    private GraphhopperService routingService;
 
     @Autowired
     private NodeService nodeService;

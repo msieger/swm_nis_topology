@@ -18,6 +18,6 @@ public class SimpleEdgeMapper implements RowMapper<SimpleEdge> {
         edge.setSource(new Node(rs.getLong("source")));
         edge.setTarget(new Node(rs.getLong("target")));
         edge.setDistance(rs.getDouble("length"));
-        return null;
+        return edge;
     }
 }

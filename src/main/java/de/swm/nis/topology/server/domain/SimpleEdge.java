@@ -2,6 +2,7 @@ package de.swm.nis.topology.server.domain;
 
 public class SimpleEdge {
 
+
     private Node source;
     private Node target;
     private double distance;
