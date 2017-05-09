@@ -76,7 +76,8 @@ public class Main {
         }
         Connection con = null;
         try{
-            con = DriverManager.getConnection(cmd.getHost(), cmd.getUser(), cmd.getPassword());
+            String url = String.format("jdbc:postgresql://%s/%s", cmd.getHost(), cmd.getDatabase());
+            con = DriverManager.getConnection(url, cmd.getUser(), cmd.getPassword());
             con.setAutoCommit(false);
             con.setClientInfo("ApplicationName", "NIS Topology Migration");
             for(String schema : cmd.getSchemas()) {
