@@ -1,0 +1,5 @@
+[general]
+name=NIS Topology
+qgisMinimumVersion=2.18
+description=NIS Topology
+version=0.1
