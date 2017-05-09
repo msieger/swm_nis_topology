@@ -142,16 +142,6 @@ public class GraphHopperNetwork {
                 return true;
             }
         });
-        /*List<Edge> edges = path.calcEdges().stream().map(edge -> {
-            Node source = new Node(nodeIds.inverse().get(edge.getBaseNode()));
-            Node target = new Node(nodeIds.inverse().get(edge.getAdjNode()));
-            try {
-                return nodeService.getShortestEdge(network, source, target);
-            } catch (NoEdgeException e) {
-                log.warn("Edge between " + source + " and " + target + " was requested, but did not exist");
-                return null;
-            }
-        }).filter(e -> e != null).collect(Collectors.toList());*/
         return new RoutingResult(edges);
     }
 }

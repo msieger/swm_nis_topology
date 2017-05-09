@@ -2,13 +2,8 @@ package de.swm.nis.topology.server.rest;
 
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.domain.RWO;
-import de.swm.nis.topology.server.routing.RoutingResult;
-import de.swm.nis.topology.server.routing.RoutingService;
-import de.swm.nis.topology.server.service.BlockedPath;
-import de.swm.nis.topology.server.service.BlockingService;
+import de.swm.nis.topology.server.service.*;
 import de.swm.nis.topology.server.database.NodeService;
-import de.swm.nis.topology.server.service.Path;
-import de.swm.nis.topology.server.service.ShortestPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +25,9 @@ public class Service {
     @Autowired
     private ShortestPath routingService;
 
+    @Autowired
+    private ReachableProviderService providerService;
+
     @RequestMapping("/route")
     public Path getRoute(
              @PathVariable String network,
@@ -37,6 +35,14 @@ public class Service {
              @RequestParam("to") long to_id
     ) {
         return routingService.find(network, new Node(from_id), new Node(to_id));
+    }
+
+    @RequestMapping(value="/node", params={"provided_by"})
+    public Set<Node> providedBy(
+            @PathVariable String network,
+            @RequestParam("provided_by") long nodeId
+    ) {
+        return providerService.findProviders(network, new Node(nodeId));
     }
 
     @RequestMapping(value="/node", params={"rwo_id", "rwo_code", "app_code"})

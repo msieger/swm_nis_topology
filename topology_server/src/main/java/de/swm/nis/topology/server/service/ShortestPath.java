@@ -6,6 +6,7 @@ import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.routing.CustomService;
 import de.swm.nis.topology.server.routing.GraphhopperService;
 import de.swm.nis.topology.server.routing.RoutingResult;
+import de.swm.nis.topology.server.routing.RoutingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class ShortestPath {
 
     @Autowired
-    private GraphhopperService routingService;
+    private RoutingService routingService;
 
     @Autowired
     private NodeService nodeService;

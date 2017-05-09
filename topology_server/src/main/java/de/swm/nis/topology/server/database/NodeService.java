@@ -207,4 +207,10 @@ public class NodeService {
     public String collect(Collection<String> geometries) {
         return String.format("MULTILINESTRING(%s)", String.join(",", geometries));
     }
+
+    @Transactional
+    public Set<Node> providers(String network) {
+        Schema.set(templ, network);
+        return new HashSet<>(templ.query("select * from providing_node", nodeMapper));
+    }
 }
