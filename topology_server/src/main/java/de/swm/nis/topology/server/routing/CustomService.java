@@ -82,13 +82,11 @@ public class CustomService implements RoutingService{
         return null;
     }
 
-    private List<Edge> traceback(CustomNode start) {
-        List<Edge> result = new ArrayList<>();
+    private List<Node> traceback(CustomNode start) {
+        List<Node> result = new ArrayList<>();
         CustomNode node = start;
         while(node != null) {
-            if(node.getPrevious() != null) {
-                result.add(node.getShortest());
-            }
+            result.add(node.getNode());
             node = node.getPrevious();
         }
         Collections.reverse(result);

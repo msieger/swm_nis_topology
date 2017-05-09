@@ -7,13 +7,13 @@ import java.util.List;
 
 public class RoutingResult {
 
-    private List<Edge> edges;
+    private List<Node> nodes;
 
-    public RoutingResult(List<Edge> edges) {
-        this.edges = edges;
+    public RoutingResult(List<Node> nodes) {
+        this.nodes = nodes;
     }
 
-    public List<Edge> getEdges() {
-        return edges;
+    public List<Node> getNodes() {
+        return nodes;
     }
 }

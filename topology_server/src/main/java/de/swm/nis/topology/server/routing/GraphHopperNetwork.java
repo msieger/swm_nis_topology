@@ -122,26 +122,11 @@ public class GraphHopperNetwork {
         }
         com.graphhopper.routing.Path path = new Dijkstra(graph, new ShortestWeighting(encoder), TraversalMode.NODE_BASED)
                 .calcPath(nodeIds.get(from), nodeIds.get(to));
-        List<Edge> edges = new ArrayList<>();
-        path.calcNodes().forEach(new TIntProcedure() {
-
-            private int prev = -1;
-
-            @Override
-            public boolean execute(int node) {
-                if(prev != -1) {
-                    Node source = new Node(nodeIds.inverse().get(prev));
-                    Node target = new Node(nodeIds.inverse().get(node));
-                    try {
-                        edges.add(nodeService.getShortestEdge(network, source, target));
-                    } catch (NoEdgeException e) {
-                        log.warn("Edge between " + source + " and " + target + " was requested, but did not exist");
-                    }
-                }
-                prev = node;
-                return true;
-            }
+        List<Node> nodes = new ArrayList<>();
+        path.calcNodes().forEach(nodeId -> {
+            nodes.add(new Node(nodeIds.inverse().get(nodeId)));
+            return true;
         });
-        return new RoutingResult(edges);
+        return new RoutingResult(nodes);
     }
 }
