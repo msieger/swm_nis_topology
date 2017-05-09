@@ -3,6 +3,8 @@ create table provider_information (
   rwo_code int primary key
 );
 grant select on provider_information to nis_readonly;
+insert into provider_information
+values (45393 /*w_gewinnungsanlage*/);
 
 drop view if exists providing_node cascade;
 create view providing_node as (
