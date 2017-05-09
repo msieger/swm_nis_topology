@@ -35,7 +35,7 @@ public class CustomService implements RoutingService{
     }
 
     @Override
-    public List<RoutingResult> route(String network, Node from, List<Node> to) {
+    public List<RoutingResult> route(String network, Node from, List<Node> to, Node ignore) {
         return null;
     }
 

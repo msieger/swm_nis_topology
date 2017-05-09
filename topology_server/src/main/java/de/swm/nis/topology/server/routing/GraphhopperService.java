@@ -49,8 +49,13 @@ public class GraphhopperService implements RoutingService{
     }
 
     @Override
-    public List<RoutingResult> route(String network, Node from, List<Node> to) {
+    public List<RoutingResult> route(String network, Node from, List<Node> to, Node ignore) {
         GraphHopperNetwork graph = getGraph(network);
-        return graph.route((int)from.getId(), to.stream().map(x -> (int)x.getId()).collect(Collectors.toList()));
+        int fromId = (int)from.getId();
+        List<Integer> toIds = to.stream().map(x -> (int)x.getId()).collect(Collectors.toList());
+        if(ignore == null) {
+            return graph.route(fromId, toIds);
+        }
+        return graph.route(fromId, toIds, (int)ignore.getId());
     }
 }

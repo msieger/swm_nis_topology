@@ -29,6 +29,9 @@ public class Service {
     @Autowired
     private ReachableProviderService providerService;
 
+    @Autowired
+    private UnreachableConsumerService consumerService;
+
     @RequestMapping("/route")
     public Path getRoute(
              @PathVariable String network,
@@ -36,6 +39,14 @@ public class Service {
              @RequestParam("to") long to_id
     ) {
         return routingService.find(network, new Node(from_id), new Node(to_id));
+    }
+
+    @RequestMapping("/node")
+    public List<Node> unreachableConsumer(
+            @PathVariable String network,
+            @RequestParam("unreachable-when-blocked") long nodeId
+    ) {
+        return consumerService.blockedNode(network, new Node(nodeId));
     }
 
     @RequestMapping(value="/node", params={"provides"})

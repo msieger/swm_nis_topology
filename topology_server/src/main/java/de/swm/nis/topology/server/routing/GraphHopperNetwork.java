@@ -8,8 +8,10 @@ import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.routing.util.FootFlagEncoder;
 import com.graphhopper.routing.util.TraversalMode;
 import com.graphhopper.routing.weighting.ShortestWeighting;
+import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.storage.GraphBuilder;
 import com.graphhopper.storage.GraphHopperStorage;
+import com.graphhopper.util.EdgeIteratorState;
 import de.swm.nis.topology.server.database.NoEdgeException;
 import de.swm.nis.topology.server.database.NodeService;
 import de.swm.nis.topology.server.domain.Edge;
@@ -117,22 +119,48 @@ public class GraphHopperNetwork {
         return graph;
     }
 
+    private ShortestWeighting getWeighting(FlagEncoder encoder, int ignore) {
+        return new ShortestWeighting(encoder) {
+            @Override
+            public double calcWeight(EdgeIteratorState edgeState, boolean reverse, int prevOrNextEdgeId) {
+                if(edgeState.getAdjNode() == ignore || edgeState.getBaseNode() == ignore) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                return super.calcWeight(edgeState, reverse, prevOrNextEdgeId);
+            }
+        };
+    }
+
     public List<RoutingResult> route(int from, List<Integer> to) {
+        return route(from, to, new ShortestWeighting(encoder));
+    }
+
+    public List<RoutingResult> route(int from, List<Integer> to, int ignore) {
+        return route(from, to, getWeighting(encoder, nodeIds.get(ignore)));
+    }
+
+    public List<RoutingResult> route(int from, List<Integer> to, Weighting weighting) {
         List<RoutingResult> result = new ArrayList<>();
         DijkstraOneToMany dijkstra =
-                new DijkstraOneToMany(graph, new ShortestWeighting(encoder), TraversalMode.NODE_BASED);
+                new DijkstraOneToMany(graph, weighting, TraversalMode.NODE_BASED);
         for(int toId : to) {
+            RoutingResult route;
             if(!nodeIds.containsKey(from) || !nodeIds.containsKey(toId)) {
-                result.add(new RoutingResult());
+                route = new RoutingResult();
             }else {
                 com.graphhopper.routing.Path path = dijkstra.calcPath(nodeIds.get(from), nodeIds.get(toId));
-                List<Node> nodes = new ArrayList<>();
-                path.calcNodes().forEach(nodeId -> {
-                    nodes.add(new Node(nodeIds.inverse().get(nodeId)));
-                    return true;
-                });
-                result.add(new RoutingResult(nodes));
+                if(!path.isFound()) {
+                    route = new RoutingResult();
+                } else {
+                    List<Node> nodes = new ArrayList<>();
+                    path.calcNodes().forEach(nodeId -> {
+                        nodes.add(new Node(nodeIds.inverse().get(nodeId)));
+                        return true;
+                    });
+                    route = new RoutingResult(nodes);
+                }
             }
+            result.add(route);
         }
 
         return result;
