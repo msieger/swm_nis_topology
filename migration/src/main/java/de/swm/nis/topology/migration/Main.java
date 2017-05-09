@@ -80,7 +80,7 @@ public class Main {
             con.setAutoCommit(false);
             con.setClientInfo("ApplicationName", "NIS Topology Migration");
             for(String schema : cmd.getSchemas()) {
-                migrate(con, schema, false, false, false);
+                migrate(con, schema, cmd.verify(), cmd.topologyLayer(), cmd.pgrouting());
                 con.commit();
             }
         } catch (Exception e) {
