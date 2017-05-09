@@ -13,7 +13,19 @@ public class RoutingResult {
         this.nodes = nodes;
     }
 
+    public RoutingResult() {
+
+    }
+
     public List<Node> getNodes() {
         return nodes;
+    }
+
+    public boolean found() {
+        return nodes != null;
+    }
+
+    public Node getEnd() {
+        return nodes.get(nodes.size() - 1);
     }
 }

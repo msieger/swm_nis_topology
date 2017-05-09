@@ -19,13 +19,14 @@ public class PgRoutingService implements RoutingService{
     private PgRoutingResultMapper resultMapper;
 
     @Override
-    public RoutingResult route(String network, Node from, Node to) {
+    public List<RoutingResult> route(String network, Node from, List<Node> to) {
         Schema.set(templ, network, Schema.PUBLIC);
-        List<PgRoutingResult> results = templ.query(
+        /*List<PgRoutingResult> results = templ.query(
                 "select * from pgr_astar('select * from pgr_edge', ?::int4, ?::int4, false, false)",
-                new Object[] { from.getId(), to.getId() }, resultMapper);
+                new Object[] { from.getId(), to.getId() }, resultMapper);*/
         RoutingResult result = new RoutingResult(null);
         //result.setNodes(results.stream().map(r -> r.getNode()).collect(Collectors.toList()));
-        return result;
+        //return result;
+        return null;
     }
 }

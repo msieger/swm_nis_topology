@@ -34,8 +34,12 @@ public class CustomService implements RoutingService{
         return edge.getGeom().getStartPoint();
     }
 
-    @Transactional(readOnly = true)
     @Override
+    public List<RoutingResult> route(String network, Node from, List<Node> to) {
+        return null;
+    }
+
+    @Transactional(readOnly = true)
     public RoutingResult route(String network, Node from, Node to) {
         Point toLocation = getLocation(network, to);
         if(toLocation == null) {

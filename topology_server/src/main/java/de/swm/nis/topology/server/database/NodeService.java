@@ -209,8 +209,8 @@ public class NodeService {
     }
 
     @Transactional
-    public Set<Node> providers(String network) {
+    public List<Node> providers(String network) {
         Schema.set(templ, network);
-        return new HashSet<>(templ.query("select * from providing_node limit 1", nodeMapper));
+        return templ.query("select * from providing_node", nodeMapper);
     }
 }

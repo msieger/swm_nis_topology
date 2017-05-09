@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -33,8 +34,8 @@ public class ShortestPath {
 
     @Transactional
     public Path find(String network, Node from, Node to) {
-        RoutingResult routing = routingService.route(network, from, to);
-        if(routing == null) {
+        RoutingResult routing = routingService.route(network, from, Arrays.asList(to)).get(0);
+        if(!routing.found()) {
             return null;
         }
         List<Edge> edges = new ArrayList<>();

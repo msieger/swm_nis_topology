@@ -2,6 +2,7 @@ package de.swm.nis.topology.server.routing;
 
 import com.google.common.collect.HashBiMap;
 import com.graphhopper.routing.Dijkstra;
+import com.graphhopper.routing.DijkstraOneToMany;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.routing.util.FootFlagEncoder;
@@ -116,17 +117,24 @@ public class GraphHopperNetwork {
         return graph;
     }
 
-    public RoutingResult route(int from, int to) {
-        if(!nodeIds.containsKey(from) || !nodeIds.containsKey(to)) {
-            return null;
+    public List<RoutingResult> route(int from, List<Integer> to) {
+        List<RoutingResult> result = new ArrayList<>();
+        DijkstraOneToMany dijkstra =
+                new DijkstraOneToMany(graph, new ShortestWeighting(encoder), TraversalMode.NODE_BASED);
+        for(int toId : to) {
+            if(!nodeIds.containsKey(from) || !nodeIds.containsKey(toId)) {
+                result.add(new RoutingResult());
+            }else {
+                com.graphhopper.routing.Path path = dijkstra.calcPath(nodeIds.get(from), nodeIds.get(toId));
+                List<Node> nodes = new ArrayList<>();
+                path.calcNodes().forEach(nodeId -> {
+                    nodes.add(new Node(nodeIds.inverse().get(nodeId)));
+                    return true;
+                });
+                result.add(new RoutingResult(nodes));
+            }
         }
-        com.graphhopper.routing.Path path = new Dijkstra(graph, new ShortestWeighting(encoder), TraversalMode.NODE_BASED)
-                .calcPath(nodeIds.get(from), nodeIds.get(to));
-        List<Node> nodes = new ArrayList<>();
-        path.calcNodes().forEach(nodeId -> {
-            nodes.add(new Node(nodeIds.inverse().get(nodeId)));
-            return true;
-        });
-        return new RoutingResult(nodes);
+
+        return result;
     }
 }

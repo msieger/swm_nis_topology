@@ -22,10 +22,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class GraphhopperService implements RoutingService{
@@ -51,8 +49,8 @@ public class GraphhopperService implements RoutingService{
     }
 
     @Override
-    public RoutingResult route(String network, Node from, Node to) {
+    public List<RoutingResult> route(String network, Node from, List<Node> to) {
         GraphHopperNetwork graph = getGraph(network);
-        return graph.route((int)from.getId(), (int)to.getId());
+        return graph.route((int)from.getId(), to.stream().map(x -> (int)x.getId()).collect(Collectors.toList()));
     }
 }

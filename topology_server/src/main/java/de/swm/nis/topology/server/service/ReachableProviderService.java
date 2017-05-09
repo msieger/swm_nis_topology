@@ -6,6 +6,7 @@ import de.swm.nis.topology.server.routing.RoutingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,11 +19,10 @@ public class ReachableProviderService {
     @Autowired
     private RoutingService routingService;
 
-    public Set<Node> findProviders(String network, Node node) {
-        Set<Node> allProviders = nodeService.providers(network);
-        return allProviders.stream().filter(provider -> {
-            return routingService.route(network, node, provider) != null;
-        }).collect(Collectors.toSet());
+    public List<Node> findProviders(String network, Node node) {
+        List<Node> allProviders = nodeService.providers(network);
+        return routingService.route(network, node, allProviders).stream()
+                .filter(route -> route.found()).map(route -> route.getEnd()).collect(Collectors.toList());
     }
 
 }

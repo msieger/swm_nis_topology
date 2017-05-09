@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RequestMapping("/{network}")
@@ -37,10 +38,10 @@ public class Service {
         return routingService.find(network, new Node(from_id), new Node(to_id));
     }
 
-    @RequestMapping(value="/node", params={"provided_by"})
-    public Set<Node> providedBy(
+    @RequestMapping(value="/node", params={"provides"})
+    public List<Node> providedBy(
             @PathVariable String network,
-            @RequestParam("provided_by") long nodeId
+            @RequestParam("provides") long nodeId
     ) {
         return providerService.findProviders(network, new Node(nodeId));
     }
