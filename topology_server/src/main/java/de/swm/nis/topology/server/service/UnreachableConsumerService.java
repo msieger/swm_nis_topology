@@ -30,11 +30,8 @@ public class UnreachableConsumerService {
         List<Node> notProvidedAfter = providedBefore.stream().filter(node ->
                         providerService.findProviders(network, node, stopNode).size() == 0
                 ).collect(Collectors.toList());
-        List<BlockedPath> result = new ArrayList<>();
-        notProvidedAfter.forEach(node -> {
-            result.add(blockingService.getBlockedPath(network, node, stopNode));
-        });
-        return result;
+        return notProvidedAfter.stream()
+                .map(node -> blockingService.getBlockedPath(network, node, stopNode)).collect(Collectors.toList());
     }
 
 }
