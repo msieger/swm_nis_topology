@@ -81,8 +81,9 @@ class Plugin:
             return
         sel = self.selection.get_selected_start()
 
-        def providers_callback(providers):
-            print(str(providers))
+        def providers_callback(resp):
+            for rwo in resp['providers']:
+                self.selection.set(rwo['id'], rwo['type'], rwo['field'])
 
         def node_callback(node):
             self.rest.get_json('/node', sel.schema, {'provides': node["id"]}, providers_callback)

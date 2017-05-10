@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,7 +31,7 @@ public class ReachableProviderService {
         ReachableProviderResult result = new ReachableProviderResult();
         result.setNodes(routingService.route(network, node, allProviders, ignore).stream()
                 .filter(route -> route.found()).map(route -> route.getEnd()).collect(Collectors.toList()));
-        result.setRwos(rwoService.getProducers(network, result.getNodes()));
+        result.setProviders(rwoService.getProducers(network, result.getNodes()));
         return result;
     }
 

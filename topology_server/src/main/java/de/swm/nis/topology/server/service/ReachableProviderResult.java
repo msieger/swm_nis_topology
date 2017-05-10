@@ -9,14 +9,14 @@ public class ReachableProviderResult {
 
     private List<Node> nodes;
 
-    private List<RWO> rwos;
+    private List<RWO> providers;
 
-    public List<RWO> getRwos() {
-        return rwos;
+    public List<RWO> getProviders() {
+        return providers;
     }
 
-    public void setRwos(List<RWO> rwos) {
-        this.rwos = rwos;
+    public void setProviders(List<RWO> providers) {
+        this.providers = providers;
     }
 
     public List<Node> getNodes() {
