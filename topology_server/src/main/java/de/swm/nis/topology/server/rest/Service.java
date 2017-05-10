@@ -50,7 +50,7 @@ public class Service {
     }
 
     @RequestMapping("/node")
-    public List<BlockedPath> unreachableConsumer(
+    public UnreachableConsumerResult unreachableConsumer(
             @PathVariable String network,
             @RequestParam("unreachable-when-blocked") long nodeId
     ) {
@@ -87,13 +87,13 @@ public class Service {
         return rwoService.getProducers(network, nodes);
     }
 
-    @RequestMapping(value="/node", params={"rwo_id", "rwo_code", "app_code"})
+    @RequestMapping(value="/node", params={"rwo_id", "type", "app_code"})
     public Set<Node> getNodes(
             @PathVariable String network,
             @RequestParam("rwo_id") long rwoId,
-            @RequestParam("rwo_code") int rwoCode,
-            @RequestParam("app_code") int appCode) {
-        return nodeService.getNodes(network, new RWO(rwoId, rwoCode, appCode));
+            @RequestParam("type") String type,
+            @RequestParam("field") String field) {
+        return nodeService.getNodes(network, new RWO(rwoId, type, field));
     }
 
     @RequestMapping(value="/node", params={"rwo_name", "geom_name", "x", "y"})

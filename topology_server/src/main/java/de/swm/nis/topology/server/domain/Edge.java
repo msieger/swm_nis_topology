@@ -10,18 +10,9 @@ public class Edge {
 
     private static final LineStringParser parser = new LineStringParser();
 
-    private RWO rwo;
     private Node source;
     private Node target;
     private LineString geom;
-
-    public RWO getRwo() {
-        return rwo;
-    }
-
-    public void setRwo(RWO rwo) {
-        this.rwo = rwo;
-    }
 
     public Node getSource() {
         return source;
@@ -59,6 +50,8 @@ public class Edge {
         }
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,7 +59,6 @@ public class Edge {
 
         Edge edge = (Edge) o;
 
-        if (rwo != null ? !rwo.equals(edge.rwo) : edge.rwo != null) return false;
         if (source != null ? !source.equals(edge.source) : edge.source != null) return false;
         if (target != null ? !target.equals(edge.target) : edge.target != null) return false;
         return !(geom != null ? !geom.equals(edge.geom) : edge.geom != null);
@@ -75,8 +67,7 @@ public class Edge {
 
     @Override
     public int hashCode() {
-        int result = rwo != null ? rwo.hashCode() : 0;
-        result = 31 * result + (source != null ? source.hashCode() : 0);
+        int result = source != null ? source.hashCode() : 0;
         result = 31 * result + (target != null ? target.hashCode() : 0);
         result = 31 * result + (geom != null ? geom.hashCode() : 0);
         return result;
@@ -85,8 +76,7 @@ public class Edge {
     @Override
     public String toString() {
         return "Edge{" +
-                "rwo=" + rwo +
-                ", source=" + source +
+                "source=" + source +
                 ", target=" + target +
                 ", geom=" + geom +
                 '}';

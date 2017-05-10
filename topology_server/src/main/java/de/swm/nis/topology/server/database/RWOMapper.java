@@ -13,8 +13,8 @@ public class RWOMapper implements RowMapper<RWO>{
     public RWO mapRow(ResultSet rs, int rowNum) throws SQLException {
         RWO rwo = new RWO();
         rwo.setId(rs.getLong("rwo_id"));
-        rwo.setCode(rs.getInt("rwo_code"));
-        rwo.setApp(rs.getInt("app_code"));
+        rwo.setType(rs.getString("typ"));
+        rwo.setField(rs.getString("field"));
         return rwo;
     }
 }

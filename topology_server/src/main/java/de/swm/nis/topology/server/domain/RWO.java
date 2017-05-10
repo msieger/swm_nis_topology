@@ -3,39 +3,39 @@ package de.swm.nis.topology.server.domain;
 public class RWO {
 
     private long id;
-    private int code;
-    private int app;
-
-    public RWO(long rwoId, int rwoCode, int appCode) {
-        this.id = rwoId;
-        this.code = rwoCode;
-        this.app = appCode;
-    }
+    private String type;
+    private String field;
 
     public RWO() {
     }
 
-    public void setId(long id) {
+    public RWO(long id, String type, String field) {
         this.id = id;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public void setApp(int app) {
-        this.app = app;
+        this.type = type;
+        this.field = field;
     }
 
     public long getId() {
         return id;
     }
 
-    public int getCode() {
-        return code;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public int getApp() {
-        return app;
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
     }
 }

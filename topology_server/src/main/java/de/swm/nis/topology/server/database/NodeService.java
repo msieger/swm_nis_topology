@@ -52,8 +52,13 @@ public class NodeService {
     @Transactional
     public Set<Node> getNodes(String network, RWO rwo) {
         Schema.set(templ, network);
-        return new HashSet<>(templ.query("select node_id from connection where rwo_id = ? and rwo_code = ? and app_code = ?",
-                new Object[]{rwo.getId(), rwo.getCode(), rwo.getApp()}, nodeMapper));
+        return new HashSet<>(templ.query(
+                " select con.node_id " +
+                " from connection con" +
+                " join definition def on con.rwo_code = def.rwo_code" +
+                " join geom_attribute attr on con.rwo_code = attr.rwo_code and con.app_code = attr.app_code" +
+                " where con.rwo_id = ? and def.table_name = ? and attr.column_name = ?",
+                new Object[]{rwo.getId(), rwo.getType(), rwo.getField()}, nodeMapper));
     }
 
     private boolean tableExists(String schema, String table) {

@@ -23,8 +23,10 @@ public class RWOService {
     public List<RWO> getConsumers(String network, List<Node> node) {
         Schema.set(templ, network);
         String sql =
-                " select distinct con.rwo_id, con.rwo_code, con.app_code" +
+                " select distinct con.rwo_id, def.table_name typ, attr.column_name field" +
                 " from connection con" +
+                " join definition def on con.rwo_code = def.rwo_code" +
+                " join geom_attribute attr on con.rwo_code = attr.rwo_code and con.app_code = attr.app_code" +
                 " join consumer_information inf on con.rwo_code = inf.rwo_code" +
                 " where con.node_id = ANY(?::int8[])";
         return templ.query(sql,
@@ -36,8 +38,10 @@ public class RWOService {
     public List<RWO> getProducers(String network, List<Node> nodes) {
         Schema.set(templ, network);
         String sql =
-                " select distinct con.rwo_id, con.rwo_code, con.app_code" +
+                " select distinct con.rwo_id, def.table_name typ, attr.column_name field" +
                         " from connection con" +
+                        " join definition def on con.rwo_code = def.rwo_code" +
+                        " join geom_attribute attr on con.rwo_code = attr.rwo_code and con.app_code = attr.app_code" +
                         " join producer_information inf on con.rwo_code = inf.rwo_code" +
                         " where con.node_id = ANY(?::int8[])";
         return templ.query(sql,
