@@ -50,7 +50,7 @@ class Plugin:
         context = {'start_id': None, 'end_id': None}
 
         def route_callback(route):
-            self.overlay.set_result_geometry(route['geometry'])
+            self.overlay.set_result_geometry([route['geometry']])
 
         def end_node_callback(end_node):
 
@@ -69,7 +69,7 @@ class Plugin:
         sel = self.selection.get_selected_start()
 
         def blocked_path_callback(blocked_path):
-            self.overlay.set_result_geometry(blocked_path['geometry'])
+            self.overlay.set_result_geometry([blocked_path['geometry']])
 
         def node_callback(node):
             self.rest.get_json('/blocked_path', sel.schema, {'node_id': node["id"]}, blocked_path_callback)
@@ -95,7 +95,9 @@ class Plugin:
         sel = self.selection.get_selected_start()
 
         def unreachable_callback(resp):
-            print(str(resp))
+            geoms = [path['geometry'] for path in resp]
+            self.overlay.set_result_geometry(geoms)
+
 
         def node_callback(node):
             self.rest.get_json('/node', sel.schema, {'unreachable-when-blocked': node["id"]}, unreachable_callback)

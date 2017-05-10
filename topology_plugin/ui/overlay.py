@@ -11,7 +11,7 @@ class Overlay:
         self.iface = iface
         self.layer = None
 
-        self.result_geom_id = None
+        self.result_geom_ids = []
 
     def _style_layer(self, layer):
         symbol = layer.rendererV2().symbols()[0]
@@ -32,21 +32,25 @@ class Overlay:
             self._style_layer(self.layer)
             registry.addMapLayer(self.layer)
 
-    def set_result_geometry(self, wkt):
+    def set_result_geometry(self, wkt_list):
         self.ensure_layer()
-        if self.result_geom_id is not None:
+        if len(self.result_geom_ids) > 0:
             self.layer.startEditing()
-            self.layer.deleteFeature(self.result_geom_id)
+            for id in self.result_geom_ids:
+                self.layer.deleteFeature(id)
             self.layer.commitChanges()
-        fet = QgsFeature()
-        geom = QgsGeometry.fromWkt(wkt)
-        if geom is None:
-            raise Exception('Result geometry could not be read')
-        fet.setGeometry(geom)
-        success, features = self.layer.dataProvider().addFeatures([fet])
-        if not success or len(features) != 1:
+        feats = []
+        for wkt in wkt_list:
+            fet = QgsFeature()
+            geom = QgsGeometry.fromWkt(wkt)
+            if geom is None:
+                raise Exception('Result geometry could not be read')
+            fet.setGeometry(geom)
+            feats.append(fet)
+        success, features = self.layer.dataProvider().addFeatures(feats)
+        if not success or len(features) != len(feats):
             raise Exception('Unable to add result feature')
-        self.result_geom_id = features[0].id()
+        self.result_geom_ids = [f.id() for f in features]
         self.layer.updateExtents()
         self.layer.dataProvider().forceReload()
         self.layer.triggerRepaint()
