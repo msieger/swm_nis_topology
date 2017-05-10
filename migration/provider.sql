@@ -4,7 +4,7 @@ create table provider_information (
 );
 grant select on provider_information to nis_readonly;
 insert into provider_information
-values (45393 /*w_gewinnungsanlage*/);
+values (2705 /*w_gewinnungsltg_abschnitt*/);
 
 drop view if exists providing_node cascade;
 create view providing_node as (
