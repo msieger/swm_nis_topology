@@ -1,5 +1,7 @@
 package de.swm.nis.topology.server.rest;
 
+import com.google.common.collect.Lists;
+import de.swm.nis.topology.server.database.RWOService;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.domain.RWO;
 import de.swm.nis.topology.server.service.*;
@@ -10,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequestMapping("/{network}")
 @RestController
@@ -31,6 +36,9 @@ public class Service {
 
     @Autowired
     private UnreachableConsumerService consumerService;
+
+    @Autowired
+    private RWOService rwoService;
 
     @RequestMapping("/route")
     public Path getRoute(
@@ -55,6 +63,28 @@ public class Service {
             @RequestParam("provides") long nodeId
     ) {
         return providerService.findProviders(network, new Node(nodeId));
+    }
+
+    @RequestMapping(value="/consumer")
+    public List<RWO> getConsumerByNode(
+            @PathVariable String network,
+            @RequestParam("by_node") String nodeIds
+    ) {
+
+        List<Node> nodes =
+                Arrays.stream(nodeIds.split(",")).map(id -> new Node(Long.parseLong(id))).collect(Collectors.toList());
+        return rwoService.getConsumers(network, nodes);
+    }
+
+    @RequestMapping(value="/producer")
+    public List<RWO> getProducerByNode(
+            @PathVariable String network,
+            @RequestParam("by_node") String nodeIds
+    ) {
+
+        List<Node> nodes =
+                Arrays.stream(nodeIds.split(",")).map(id -> new Node(Long.parseLong(id))).collect(Collectors.toList());
+        return rwoService.getProducers(network, nodes);
     }
 
     @RequestMapping(value="/node", params={"rwo_id", "rwo_code", "app_code"})
