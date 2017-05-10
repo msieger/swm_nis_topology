@@ -95,8 +95,10 @@ class Plugin:
         sel = self.selection.get_selected_start()
 
         def unreachable_callback(resp):
-            geoms = [path['geometry'] for path in resp]
+            geoms = [path['geometry'] for path in resp['blockedPaths']]
             self.overlay.set_result_geometry(geoms)
+            for rwo in resp['consumers']:
+                self.selection.set(rwo['id'], rwo['type'], rwo['field'])
 
 
         def node_callback(node):

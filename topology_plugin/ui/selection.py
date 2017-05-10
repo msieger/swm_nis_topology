@@ -85,15 +85,26 @@ class Selection:
         features = layer.selectedFeatures()
         return [self._get_rwo_id(f) for f in features]
 
-    def set(self, rwo_ids):
+    def _find_layer(self, type, field):
         canvas = self.iface.mapCanvas()
-        layer = canvas.currentLayer()
+        for layer in canvas.layers():
+            uri = QgsDataSourceURI(layer.dataProvider().dataSourceUri())
+            if uri.table() == type and uri.geometryColumn() == field:
+                return layer
+        return None
+
+    def set(self, rwo_id, type, field):
+        layer = self._find_layer(type, field)
         if layer is None:
             return
         fit = layer.getFeatures()
         feat = QgsFeature()
         while fit.nextFeature(feat):
-            if self._get_rwo_id(feat) in rwo_ids:
+            try:
+                feat.attribute('rwo_id')
+            except KeyError:
+                break
+            if self._get_rwo_id(feat) == rwo_id:
                 layer.select(feat.id())
-        canvas.refresh()
+            self.iface.mapCanvas().refresh()
 
