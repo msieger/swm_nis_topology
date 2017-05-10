@@ -21,5 +21,5 @@ ST_X(ST_StartPoint(geom)) as x1,
 ST_Y(ST_StartPoint(geom)) as y1,
 ST_X(ST_EndPoint(geom)) as x2,
 ST_Y(ST_EndPoint(geom)) as y2
-from neighbor
+from all_neighbor
 where geom is not null;
