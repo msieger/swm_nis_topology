@@ -42,7 +42,7 @@ public class Service {
     }
 
     @RequestMapping("/node")
-    public List<Node> unreachableConsumer(
+    public List<BlockedPath> unreachableConsumer(
             @PathVariable String network,
             @RequestParam("unreachable-when-blocked") long nodeId
     ) {

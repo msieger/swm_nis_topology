@@ -21,7 +21,7 @@ public class UnreachableConsumerService {
     @Autowired
     private NodeService nodeService;
 
-    public List<Node> blockedNode(String network, Node stopNode) {
+    public List<BlockedPath> blockedNode(String network, Node stopNode) {
         List<Node> candiates = nodeService.getNeighbors(network, stopNode, NodeService.ExpandBehavior.ALWAYS)
                 .stream().map(edge -> edge.getTarget()).collect(Collectors.toList());
         List<Node> providedBefore = candiates.stream().filter(node ->
@@ -30,9 +30,9 @@ public class UnreachableConsumerService {
         List<Node> notProvidedAfter = providedBefore.stream().filter(node ->
                         providerService.findProviders(network, node, stopNode).size() == 0
                 ).collect(Collectors.toList());
-        List<Node> result = new ArrayList<>();
+        List<BlockedPath> result = new ArrayList<>();
         notProvidedAfter.forEach(node -> {
-            result.addAll(blockingService.getBlockedPath(network, node, stopNode).getNodes());
+            result.add(blockingService.getBlockedPath(network, node, stopNode));
         });
         return result;
     }

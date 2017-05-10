@@ -166,7 +166,7 @@ public class NodeService {
         throw new NoEdgeException("Request for shortest edge between " + from + " and " + to + ", which does not exist");
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void getAllSimpleEdges(String network, SimpleEdgeCallback cb) {
         Schema.set(templ, network, Schema.PUBLIC);
         templ.setFetchSize(FETCH_SIZE);

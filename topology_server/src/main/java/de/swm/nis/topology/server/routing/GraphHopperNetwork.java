@@ -109,7 +109,9 @@ public class GraphHopperNetwork {
                 count++;
             }
         });
+        log.info("Done building graph for " + network);
         graph.flush();
+        log.info("Saved graph to disk");
         File nodeMapFile = nodeIdFile();
         try(ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(nodeMapFile))) {
             out.writeObject(nodeIds);
