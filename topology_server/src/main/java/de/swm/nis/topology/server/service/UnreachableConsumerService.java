@@ -29,10 +29,10 @@ public class UnreachableConsumerService {
         List<Node> candiates = nodeService.getNeighbors(network, stopNode, NodeService.ExpandBehavior.ALWAYS)
                 .stream().map(edge -> edge.getTarget()).collect(Collectors.toList());
         List<Node> providedBefore = candiates.stream().filter(node ->
-                providerService.findProviders(network, node).size() > 0
+                providerService.findProviders(network, node).getNodes().size() > 0
         ).collect(Collectors.toList());
         List<Node> notProvidedAfter = providedBefore.stream().filter(node ->
-                        providerService.findProviders(network, node, stopNode).size() == 0
+                        providerService.findProviders(network, node, stopNode).getNodes().size() == 0
                 ).collect(Collectors.toList());
         UnreachableConsumerResult result = new UnreachableConsumerResult();
         result.setBlockedPaths(notProvidedAfter.stream()

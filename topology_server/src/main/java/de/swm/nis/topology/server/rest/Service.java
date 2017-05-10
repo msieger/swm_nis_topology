@@ -58,7 +58,7 @@ public class Service {
     }
 
     @RequestMapping(value="/node", params={"provides"})
-    public List<Node> providedBy(
+    public ReachableProviderResult providedBy(
             @PathVariable String network,
             @RequestParam("provides") long nodeId
     ) {

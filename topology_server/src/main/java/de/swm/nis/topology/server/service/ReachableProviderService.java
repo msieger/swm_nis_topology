@@ -1,6 +1,7 @@
 package de.swm.nis.topology.server.service;
 
 import de.swm.nis.topology.server.database.NodeService;
+import de.swm.nis.topology.server.database.RWOService;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.routing.RoutingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,20 @@ public class ReachableProviderService {
     @Autowired
     private RoutingService routingService;
 
-    public List<Node> findProviders(String network, Node node) {
+    @Autowired
+    private RWOService rwoService;
+
+    public ReachableProviderResult findProviders(String network, Node node) {
         return findProviders(network, node, null);
     }
 
-    public List<Node> findProviders(String network, Node node, Node ignore) {
+    public ReachableProviderResult findProviders(String network, Node node, Node ignore) {
         List<Node> allProviders = nodeService.providers(network);
-        return routingService.route(network, node, allProviders, ignore).stream()
-                .filter(route -> route.found()).map(route -> route.getEnd()).collect(Collectors.toList());
+        ReachableProviderResult result = new ReachableProviderResult();
+        result.setNodes(routingService.route(network, node, allProviders, ignore).stream()
+                .filter(route -> route.found()).map(route -> route.getEnd()).collect(Collectors.toList()));
+        result.setRwos(rwoService.getProducers(network, result.getNodes()));
+        return result;
     }
 
 }
