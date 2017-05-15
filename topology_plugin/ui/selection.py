@@ -1,4 +1,5 @@
 import re
+from flag_overlay import *
 from qgis.core import *
 from qgis.gui import *
 import sys
@@ -26,12 +27,15 @@ class Selection:
         self.end_map_tool = QgsMapToolEmitPoint(iface.mapCanvas())
         self.end_map_tool.canvasClicked.connect(self._end_clicked)
         self.end_selected = None
+        self.overlay = FlagOverlay(iface)
 
     def _start_clicked(self, point, button):
         self.start_selected = self._canvas_clicked(point, button)
+        self.overlay.set_start((point.x(), point.y()))
 
     def _end_clicked(self, point, button):
         self.end_selected = self._canvas_clicked(point, button)
+        self.overlay.set_finish((point.x(), point.y()))
 
     def _canvas_clicked(self, point, button):
         layer = self.iface.mapCanvas().currentLayer()
@@ -93,10 +97,18 @@ class Selection:
                 return layer
         return None
 
-    def set(self, rwo_id, type, field):
-        layer = self._find_layer(type, field)
-        if layer is None:
-            return
+    def _group(self, rwos):
+        groups = {}
+        for rwo in rwos:
+            grp = (rwo[1], rwo[2])
+            if not grp in groups:
+                groups[grp] = []
+            elements = groups[grp]
+            elements.append(rwo)
+        return groups
+
+    def set(self, rwo_ids, layer):
+        print(str(rwo_ids))
         fit = layer.getFeatures()
         feat = QgsFeature()
         while fit.nextFeature(feat):
@@ -104,7 +116,17 @@ class Selection:
                 feat.attribute('rwo_id')
             except KeyError:
                 break
-            if self._get_rwo_id(feat) == rwo_id:
+            if self._get_rwo_id(feat) in rwo_ids:
                 layer.select(feat.id())
             self.iface.mapCanvas().refresh()
+
+    def set(self, rwos):
+        groups = self._group(rwos)
+        for group in groups:
+            first = groups[group][0]
+            layer = self._find_layer(first[1], first[2])
+            if layer is None:
+                return
+            self.set([rwo[1] for rwo in groups[group]], layer)
+
 

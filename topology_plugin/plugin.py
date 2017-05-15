@@ -22,6 +22,9 @@ class Plugin:
     def on_request_fail(self, text):
         self.iface.messageBar().pushMessage("Error", text)
 
+    def info(self, text):
+        self.iface.messageBar().pushMessage("Info", text)
+
     def check_selected(self, start, end):
         start_missing = (start and self.selection.get_selected_start() is None)
         end_missing = (end and self.selection.get_selected_end() is None)
@@ -33,7 +36,7 @@ class Plugin:
         elif end_missing:
             text = u"Ein Ende muss für diese Operation ausgewählt werden"
         if text is not None:
-            self.iface.messageBar().pushMessage("Info", text)
+            self.info(text)
             return False
         return True
 
@@ -50,7 +53,10 @@ class Plugin:
         context = {'start_id': None, 'end_id': None}
 
         def route_callback(route):
-            self.overlay.set_result_geometry([route['geometry']])
+            if route is not None:
+                self.overlay.set_result_geometry([route['geometry']])
+            else:
+                self.info("Es konnte keine Route gefunden werden.")
 
         def end_node_callback(end_node):
 
@@ -82,8 +88,7 @@ class Plugin:
         sel = self.selection.get_selected_start()
 
         def providers_callback(resp):
-            for rwo in resp['providers']:
-                self.selection.set(rwo['id'], rwo['type'], rwo['field'])
+            self.selection.set([(rwo['id'], rwo['type'], rwo['field']) for rwo in resp['providers']])
 
         def node_callback(node):
             self.rest.get_json('/node', sel.schema, {'provides': node["id"]}, providers_callback)
@@ -98,8 +103,7 @@ class Plugin:
         def unreachable_callback(resp):
             geoms = [path['geometry'] for path in resp['blockedPaths']]
             self.overlay.set_result_geometry(geoms)
-            for rwo in resp['consumers']:
-                self.selection.set(rwo['id'], rwo['type'], rwo['field'])
+            self.selection.set([(rwo['id'], rwo['type'], rwo['field']) for rwo in resp['consumers']])
 
 
         def node_callback(node):

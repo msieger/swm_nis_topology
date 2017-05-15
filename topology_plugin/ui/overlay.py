@@ -1,6 +1,7 @@
 from qgis.core import *
 from qgis.gui import *
 from PyQt4.QtGui import *
+from util import get_overlay
 
 LAYER_NAME = 'NIS topology result overlay'
 
@@ -19,18 +20,7 @@ class Overlay:
         symbol.setWidth(2)
 
     def ensure_layer(self):
-        registry = QgsMapLayerRegistry.instance()
-        for layer_name in registry.mapLayers():
-            layer = registry.mapLayer(layer_name)
-            if layer.originalName() == LAYER_NAME:
-                self.layer = layer
-                break
-        if self.layer is None:
-            self.layer = QgsVectorLayer('Multilinestring?crs=epsg:31468', LAYER_NAME, 'memory')
-            if not self.layer.isValid():
-                raise Exception('Overlay layer is not valid')
-            self._style_layer(self.layer)
-            registry.addMapLayer(self.layer)
+        self.layer = get_overlay(LAYER_NAME, 'Multilinestring?crs=epsg:31468', self._style_layer)
 
     def set_result_geometry(self, wkt_list):
         self.ensure_layer()

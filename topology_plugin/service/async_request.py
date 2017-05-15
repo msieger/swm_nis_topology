@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import urllib2
 from PyQt4.QtCore import *
 import threading
@@ -24,11 +25,11 @@ class AsyncRequest(QObject):
             res = urllib2.urlopen(self.url, self._build_params())
             self.done.emit(res.getcode(), res.read())
         except urllib2.HTTPError, e:
-            self.fail.emit("The server did reject the request")
+            self.fail.emit(u"Der Server hat die Verbindung abgelehnt")
         except urllib2.URLError, e:
             e = sys.exc_info()[0]
             print(str(e))
             if hasattr(e, 'reason'):
-                self.fail.emit("Unable to execute request: " + str(e.reason))
+                self.fail.emit(u"Die Anfrage konnte nicht ausgeführt werden: " + str(e.reason))
             else:
-                self.fail.emit("Unable to execute request")
+                self.fail.emit(u"Die Anfrage konnte nicht ausgeführt werden")

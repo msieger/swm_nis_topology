@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from async_request import *
 import json
 
@@ -16,8 +17,11 @@ class RestService(QObject):
 
         def callback(code, body):
             if code == 200:
-                js = json.loads(body)
-                cb(js)
+                if body:
+                    js = json.loads(body)
+                    cb(js)
+                else:
+                    cb(None)
             else:
                 print(url + ' returned status ' + str(code))
 
