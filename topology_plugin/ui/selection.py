@@ -101,14 +101,13 @@ class Selection:
         groups = {}
         for rwo in rwos:
             grp = (rwo[1], rwo[2])
-            if not grp in groups:
+            if grp not in groups:
                 groups[grp] = []
             elements = groups[grp]
-            elements.append(rwo)
+            elements.append(rwo[0])
         return groups
 
-    def set(self, rwo_ids, layer):
-        print(str(rwo_ids))
+    def set_ids_selected(self, rwo_ids, layer):
         fit = layer.getFeatures()
         feat = QgsFeature()
         while fit.nextFeature(feat):
@@ -118,15 +117,16 @@ class Selection:
                 break
             if self._get_rwo_id(feat) in rwo_ids:
                 layer.select(feat.id())
-            self.iface.mapCanvas().refresh()
 
     def set(self, rwos):
+        canvas = self.iface.mapCanvas()
         groups = self._group(rwos)
         for group in groups:
-            first = groups[group][0]
-            layer = self._find_layer(first[1], first[2])
-            if layer is None:
-                return
-            self.set([rwo[1] for rwo in groups[group]], layer)
+            layer = self._find_layer(group[0], group[1])
+            if layer is not None:
+                layer.removeSelection()
+                self.set_ids_selected(groups[group], layer)
+        canvas.refresh()
+        canvas.zoomToSelected()
 
 
