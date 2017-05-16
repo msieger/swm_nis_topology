@@ -37,7 +37,9 @@ public class UnreachableConsumerService {
         UnreachableConsumerResult result = new UnreachableConsumerResult();
         result.setBlockedPaths(notProvidedAfter.stream()
                 .map(node -> blockingService.getBlockedPath(network, node, stopNode)).collect(Collectors.toList()));
-        result.setConsumers(rwoService.getConsumers(network, notProvidedAfter));
+        List<Node> allNodes = result.getBlockedPaths().stream()
+                .flatMap(path -> path.getNodes().stream()).collect(Collectors.toList());
+        result.setConsumers(rwoService.getConsumers(network, allNodes));
         return result;
     }
 
