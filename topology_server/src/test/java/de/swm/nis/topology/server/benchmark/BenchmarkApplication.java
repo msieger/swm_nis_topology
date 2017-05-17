@@ -19,14 +19,16 @@ import java.io.IOException;
 @ComponentScan("de.swm.nis.topology.server")
 public class BenchmarkApplication {
 
+
     public static final AnnotationConfigApplicationContext instance =
             new AnnotationConfigApplicationContext(BenchmarkApplication.class);
 
     public static void main(String[] args) throws IOException, RunnerException {
         Options opt = new OptionsBuilder()
-                .include(Neighbor.class.getSimpleName())
+                .include("de.swm.nis.topology.server.benchmark")
                 .forks(1)
                 .measurementIterations(100)
+                .result("benchmark.txt")
                 .build();
 
         new Runner(opt).run();

@@ -4,4 +4,5 @@
 *.log
 target/
 graphhopper/
+topology_server/benchmark.txt
 
