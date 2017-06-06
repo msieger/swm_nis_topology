@@ -9,5 +9,5 @@ create table geom_attribute (
 grant select on geom_attribute to nis_readonly;
 
 insert into geom_attribute
-select rwo_code, app_code, name
+select rwo_code, app_code, mapping_geom_name
 from sw_gis_rwo_geom_attribute;
