@@ -1,4 +1,4 @@
-package de.swm.nis.topology.server.benchmark;
+package de.swm.nis.topology.server.benchmark.jmh;
 
 import com.google.common.collect.Lists;
 import de.swm.nis.topology.server.domain.Node;
@@ -6,8 +6,6 @@ import de.swm.nis.topology.server.routing.RoutingService;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-
-import java.util.ArrayList;
 
 @State(Scope.Thread)
 public class ShortestPath {

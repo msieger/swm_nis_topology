@@ -1,6 +1,8 @@
 package de.swm.nis.topology.server;
 
+import de.swm.nis.topology.server.routing.CustomService;
 import de.swm.nis.topology.server.routing.GraphhopperService;
+import de.swm.nis.topology.server.routing.PgRoutingService;
 import de.swm.nis.topology.server.routing.RoutingService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,6 @@ public class Application extends SpringBootServletInitializer{
 
     @Bean
     public Logger getLogger() {
-        return Logger.getLogger("topology_server");
+        return Logger.getRootLogger();
     }
 }

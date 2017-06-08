@@ -1,17 +1,12 @@
-package de.swm.nis.topology.server.benchmark;
+package de.swm.nis.topology.server.benchmark.jmh;
 
-import de.swm.nis.topology.server.Application;
-import org.openjdk.jmh.Main;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import java.io.IOException;
 
@@ -25,7 +20,7 @@ public class BenchmarkApplication {
 
     public static void main(String[] args) throws IOException, RunnerException {
         Options opt = new OptionsBuilder()
-                .include("de.swm.nis.topology.server.benchmark")
+                .include("de.swm.nis.topology.server.benchmark.jmh")
                 .forks(1)
                 .measurementIterations(100)
                 .result("benchmark.txt")

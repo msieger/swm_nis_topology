@@ -21,6 +21,10 @@ public class RoutingResult {
         return nodes;
     }
 
+    public void setNodes(List<Node> nodes) {
+        this.nodes = nodes;
+    }
+
     public boolean found() {
         return nodes != null;
     }
