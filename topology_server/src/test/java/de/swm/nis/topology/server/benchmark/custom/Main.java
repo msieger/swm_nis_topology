@@ -15,7 +15,7 @@ public class Main {
     }
 
     private static void enclosedLeakage(String network) throws IOException {
-        new BenchmarkRunner(new BlockedPath(network), Paths.get(network+"_enclosedLeakage"),
+        new BenchmarkRunner(new BlockedPath(network), Paths.get(network+"_enclosedLeakage.txt"),
                 2, Paths.get(network+"_enclosedLeakageResult.txt")).run();
     }
 

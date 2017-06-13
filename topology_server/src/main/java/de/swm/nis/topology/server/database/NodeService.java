@@ -61,6 +61,15 @@ public class NodeService {
                 new Object[]{rwo.getId(), rwo.getType(), rwo.getField()}, nodeMapper));
     }
 
+    @Transactional
+    public Set<Node> getNodes(String network) {
+        Schema.set(templ, network);
+        return new HashSet<>(templ.query(
+                " select node_id" +
+                " from node",
+                new Object[]{}, nodeMapper));
+    }
+
     private boolean tableExists(String schema, String table) {
         return templ.query("select 1 from information_schema.tables where table_schema = ? and table_name = ?",
                 new Object[] {schema, table}, intMapper).size() == 1;

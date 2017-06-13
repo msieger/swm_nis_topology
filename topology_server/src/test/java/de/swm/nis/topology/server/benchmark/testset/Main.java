@@ -2,13 +2,18 @@ package de.swm.nis.topology.server.benchmark.testset;
 
 import com.google.common.collect.Lists;
 import de.swm.nis.topology.server.benchmark.jmh.BenchmarkApplication;
+import de.swm.nis.topology.server.database.NodeMapper;
 import de.swm.nis.topology.server.database.NodeService;
+import de.swm.nis.topology.server.database.Schema;
+import de.swm.nis.topology.server.database.Util;
 import de.swm.nis.topology.server.domain.Node;
 import de.swm.nis.topology.server.routing.RoutingResult;
 import de.swm.nis.topology.server.routing.RoutingService;
 import de.swm.nis.topology.server.service.BlockedPath;
 import de.swm.nis.topology.server.service.BlockingService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -25,19 +30,27 @@ public class Main {
         //shortestPath("fw");
         //shortestPath("ss");
         //shortestPath("ga");
-        enclosedLeakage("ga");
+        enclosedLeakage("ga", Lists.newArrayList("2600"));
     }
 
-    private static void enclosedLeakage(String network) throws FileNotFoundException {
+    @Transactional
+    private static List<Node> leakageNodes(String network, List<String> rwoCodes) {
+        JdbcTemplate templ = app.getBean(JdbcTemplate.class);
+        NodeMapper mapper = app.getBean(NodeMapper.class);
+        return templ.query(String.format(" select node_id from %s.connection where rwo_code = ANY(?::int4[])", network),
+                new Object[]{Util.pgArray(rwoCodes)}, mapper);
+    }
+
+    private static void enclosedLeakage(String network, List<String> rwoCodes) throws FileNotFoundException {
         BlockingService service = app.getBean(BlockingService.class);
-        NodeService nodeService = app.getBean(de.swm.nis.topology.server.database.NodeService.class);
         List<long[]> result = new ArrayList<>();
-        List<Node> nodes = new ArrayList<>(nodeService.getNodes(network));
+        List<Node> nodes = leakageNodes(network, rwoCodes);
         Random rnd = new Random();
         while(result.size() < 100) {
             Node node = nodes.get(rnd.nextInt(nodes.size()));
             BlockedPath blockedPath = service.getBlockedPath(network, node);
-            if(blockedPath.getNodes().size() < 100) {
+            int s = blockedPath.getNodes().size();
+            if(s > 4 && s < 100) {
                 result.add(new long[]{node.getId(), blockedPath.getNodes().size()});
             }
         }
