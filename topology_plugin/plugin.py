@@ -128,8 +128,8 @@ class Plugin:
         self.toolbar.add(u"Kürzester Weg", "path.png", self.shortest_path)
         self.toolbar.add(u"Versorger finden", "provider.png", self.providers)
         self.toolbar.add(u"Betroffene Verbraucher finden", "consumer.png", self.outage_analysis)
-        self.toolbar.add(u"Start", "Cross1.png", self.select_start)
-        self.toolbar.add(u"Ende", "Cross1.png", self.select_end)
+        self.toolbar.add(u"Start", "cross_start.png", self.select_start)
+        self.toolbar.add(u"Ende", "cross_end.png", self.select_end)
 
     def unload(self):
         self.toolbar.remove_all()

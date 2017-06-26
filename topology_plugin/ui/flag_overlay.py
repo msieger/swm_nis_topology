@@ -15,16 +15,23 @@ class FlagOverlay:
         self.start = None
         self.finish = None
 
-    def _style_layer(self, layer):
-        symbol = QgsMarkerSymbolV2.createSimple({"name": "capital", "width": "4.0", "color": "0,0,0"})
+    def _style_start(self, layer):
+        self._style_layer(layer, (0, 200, 0))
+
+    def _style_end(self, layer):
+        self._style_layer(layer, (200, 0, 0))
+
+    def _style_layer(self, layer, color):
+        symbol = QgsMarkerSymbolV2.createSimple({"name": "capital", "width": "4.0", "color": "{},{},{}"
+                                                .format(color[0], color[1], color[2])})
         layer.rendererV2().setSymbol(symbol)
 
 
     def get_start_layer(self):
-        return get_overlay(START_LAYER_NAME, 'Point?crs=epsg:31468', self._style_layer)
+        return get_overlay(START_LAYER_NAME, 'Point?crs=epsg:31468', self._style_start)
 
     def get_finish_layer(self):
-        return get_overlay(FINISH_LAYER_NAME, 'Point?crs=epsg:31468', self._style_layer)
+        return get_overlay(FINISH_LAYER_NAME, 'Point?crs=epsg:31468', self._style_end)
 
     def set_start(self, start):
         self.start = start
@@ -43,14 +50,10 @@ class FlagOverlay:
     def _set(self, position, layer):
         remove_all(layer)
         provider = layer.dataProvider()
-        feats = []
-        if self.start:
-            feats.append(self.create_feature(self.start))
-        if self.finish:
-            feats.append(self.create_feature(self.finish))
-        success, features = provider.addFeatures(feats)
-        if not success:
-            raise Exception("Could not add feature")
+        if position:
+            success, features = provider.addFeatures([self.create_feature(position)])
+            if not success:
+                raise Exception("Could not add feature")
         layer.updateExtents()
         layer.dataProvider().forceReload()
         layer.triggerRepaint()

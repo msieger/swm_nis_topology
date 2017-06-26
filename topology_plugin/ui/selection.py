@@ -39,6 +39,8 @@ class Selection:
 
     def _canvas_clicked(self, point, button):
         layer = self.iface.mapCanvas().currentLayer()
+        if not layer:
+            return
         extent = QgsVector(0.2, 0.2)
         features = layer.getFeatures(QgsFeatureRequest(QgsRectangle(point + extent, point - extent)))
         feat = QgsFeature()
